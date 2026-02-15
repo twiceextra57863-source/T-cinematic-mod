@@ -20,14 +20,29 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Fix gradlew
+      - name: Fix gradlew completely
         run: |
-          tr -d '\r' < gradlew > gradlew.tmp
-          mv gradlew.tmp gradlew
+          # Remove the old gradlew file
+          rm -f gradlew
+          
+          # Download a fresh gradlew from Gradle
+          wget https://raw.githubusercontent.com/gradle/gradle/v8.11.0/gradlew
+          
+          # Make it executable
           chmod +x gradlew
           
-          # Update gradle version in wrapper properties
-          sed -i 's/gradle-.*-bin.zip/gradle-8.11-bin.zip/' gradle/wrapper/gradle-wrapper.properties
+          # Also ensure gradle-wrapper.jar exists
+          mkdir -p gradle/wrapper
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            wget -O gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.11.0/gradle/wrapper/gradle-wrapper.jar
+          fi
+          
+          # Update gradle-wrapper.properties to use Gradle 8.11
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.11-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
 
       - name: Build mod
         run: ./gradlew build
