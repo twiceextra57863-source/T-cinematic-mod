@@ -10,11 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Repo checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Setup Java 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -22,24 +20,18 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Completely recreate gradlew file
       - name: Fix gradlew
         run: |
-          # Download fresh gradlew from Gradle
-          curl -L -o gradlew.new https://raw.githubusercontent.com/gradle/gradle/master/gradlew
-          chmod +x gradlew.new
-          mv gradlew.new gradlew
+          tr -d '\r' < gradlew > gradlew.tmp
+          mv gradlew.tmp gradlew
+          chmod +x gradlew
           
-          # Also ensure gradle-wrapper.jar exists
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar
-          fi
+          # Update gradle version in wrapper properties
+          sed -i 's/gradle-.*-bin.zip/gradle-8.11-bin.zip/' gradle/wrapper/gradle-wrapper.properties
 
-      # Step 4: Build with Gradle
       - name: Build mod
         run: ./gradlew build
 
-      # Step 5: Upload build artifact (JAR)
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
