@@ -1,31 +1,60 @@
 plugins {
-    id 'java'
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'maven-publish'
 }
 
-group = 'com.example'
-version = '1.0.0'
-archivesBaseName = 'cinematic-mod'
+version = project.mod_version
+group = project.maven_group
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+base {
+    archivesName = project.archives_base_name
 }
 
 repositories {
-    mavenCentral()
-    maven { url = 'https://maven.fabricmc.net/' }
+    // Add repos if needed
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    accessWidener 'src/main/share.accesswidener'
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:1.21.4"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:0.15.0"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.102.0+1.21.4"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
+processResources {
+    inputs.property "version", project.version
+    filteringCharset "UTF-8"
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    options.release.set(21)
+    it.options.encoding = "UTF-8"
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        it.options.release = targetJavaVersion
+    }
+}
+
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+    archivesBaseName = project.archives_base_name
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}"}
+    }
 }
