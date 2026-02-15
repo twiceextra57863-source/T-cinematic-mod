@@ -11,7 +11,6 @@ base {
 }
 
 repositories {
-    // Add repositories if needed
     maven {
         name = "Fabric"
         url = "https://maven.fabricmc.net/"
@@ -21,20 +20,15 @@ repositories {
 
 loom {
     splitEnvironmentSourceSets()
-    accessWidener = file("src/main/resources/share.accesswidener")
+    
+    // Fix: Use accessWidenerPath, not accessWidener
+    accessWidenerPath = file("src/main/resources/share.accesswidener")
 }
 
 dependencies {
-    // Minecraft
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    
-    // Mappings
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    
-    // Fabric Loader
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    
-    // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
@@ -69,23 +63,5 @@ java {
 jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
-    }
-}
-
-// Ensure gradle-wrapper.properties uses Gradle 8.11
-// File: gradle/wrapper/gradle-wrapper.properties
-// distributionUrl=https\://services.gradle.org/distributions/gradle-8.11-bin.zip
-
-publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
-            from components.java
-        }
-    }
-    
-    repositories {
-        // Add repositories to publish to here
-        mavenLocal()
     }
 }
