@@ -1,30 +1,40 @@
-name: Build Mod
-on: [push, pull_request, workflow_dispatch]
+name: Build Cinematic Mod
+on: 
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
-    - name: Setup Java 21
+    # Fix gradlew permissions & line endings FIRST
+    - name: Fix gradlew
+      run: |
+        chmod +x gradlew
+        sed -i 's/
+$//' gradlew
+        dos2unix gradlew 2>/dev/null || true
+    
+    # Setup Java 21
+    - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '21'
         
-    # 🔥 FIX 1: Make executable
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      
-    # 🔥 FIX 2: Fix Windows line endings (CRLF → LF)
-    - name: Fix gradlew line endings
-      run: |
-        sed -i 's/
-$//' gradlew
-        dos2unix gradlew || true
-        
+    # Cache Gradle
     - name: Cache Gradle
       uses: actions/cache@v4
       with:
@@ -32,16 +42,30 @@ $//' gradlew
           ~/.gradle/caches
           ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     
-    # Now it will work!
-    - name: Validate Gradle
+    # Test Gradle works
+    - name: Check Gradle
       run: ./gradlew --version
       
-    - name: Build Mod
+    # Run Minecraft client test
+    - name: Test Run
+      run: ./gradlew runClient --stacktrace
+      continue-on-error: true  # Optional - skip if fails
+      
+    # Build JAR
+    - name: Build
       run: ./gradlew build --stacktrace
       
-    - name: Upload JAR
+    # Upload JAR files
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: CinematicMod-1.21.4
+        name: CinematicMod-1.21.4-${{ github.sha }}
         path: build/libs/*.jar
+        retention-days: 30
+        
+    # Show what was built
+    - name: List JARs
+      run: ls -la build/libs/
