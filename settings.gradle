@@ -1,1 +1,11 @@
-rootProject.name = "cinematic-mod"
+pluginManagement {
+    repositories {
+        maven { name = "Fabric" url = "https://maven.fabricmc.net/" }
+        gradlePluginPortal()
+    }
+}
+plugins {
+    id "fabric-loom" version "1.9-SNAPSHOT"
+    id "maven-publish"
+}
+rootProject.name = "CinematicMod"
