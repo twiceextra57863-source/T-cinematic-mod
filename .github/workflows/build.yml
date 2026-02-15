@@ -22,21 +22,19 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Fix Windows line endings in gradlew
-      - name: Fix gradlew line endings
-        run: sed -i 's/\r$//' gradlew
-
-      # Step 4: Grant permission to gradlew
+      # Step 3: Grant permission to gradlew
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # Step 5: Build with Gradle
+      # Step 4: Build with Gradle
       - name: Build mod
         run: ./gradlew build
 
-      # Step 6: Upload build artifact (JAR)
+      # Step 5: Upload build artifact (JAR)
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: Fabric-Mod-JAR
+          name: T-cinematic-mod
           path: build/libs/*.jar
+          
+
