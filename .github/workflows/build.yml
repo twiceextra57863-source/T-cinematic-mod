@@ -22,9 +22,18 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Grant permission to gradlew
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      # Step 3: Completely recreate gradlew file
+      - name: Fix gradlew
+        run: |
+          # Download fresh gradlew from Gradle
+          curl -L -o gradlew.new https://raw.githubusercontent.com/gradle/gradle/master/gradlew
+          chmod +x gradlew.new
+          mv gradlew.new gradlew
+          
+          # Also ensure gradle-wrapper.jar exists
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar
+          fi
 
       # Step 4: Build with Gradle
       - name: Build mod
@@ -34,7 +43,5 @@ jobs:
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: T-cinematic-mod
+          name: Fabric-Mod-JAR
           path: build/libs/*.jar
-          
-
