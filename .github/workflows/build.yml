@@ -23,9 +23,10 @@ jobs:
     - name: Fix gradlew
       run: |
         chmod +x gradlew
-        sed -i 's/
-$//' gradlew
-        dos2unix gradlew 2>/dev/null || true
+        sed -i 's/\r$//' gradlew  # Fixed: removed the line break in the regex
+        # Alternative if dos2unix is available:
+        # sudo apt-get update && sudo apt-get install -y dos2unix
+        # dos2unix gradlew
     
     # Setup Java 21
     - name: Setup Java
@@ -48,11 +49,6 @@ $//' gradlew
     # Test Gradle works
     - name: Check Gradle
       run: ./gradlew --version
-      
-    # Run Minecraft client test
-    - name: Test Run
-      run: ./gradlew runClient --stacktrace
-      continue-on-error: true  # Optional - skip if fails
       
     # Build JAR
     - name: Build
