@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "cinematicmod",
+  "version": "1.0.0",
+  "name": "Cinematic Replay Mod",
+  "description": "Record and replay cinematic moments in single-player worlds.",
+  "authors": ["YourName"],
+  "contact": {
+    "sources": "https://github.com/YourName/cinematic-mod"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.example.cinematicmod.CinematicMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "1.21.4"
+  }
+}
